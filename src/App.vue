@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
 import { ShoppingCart, List, Check } from '@element-plus/icons-vue'
-import { watch, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
@@ -15,10 +15,6 @@ const router = useRouter()
 
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 const mobileMenuOpen = ref(false)
-
-watch(() => authStore.isLoggedIn, (loggedIn) => {
-  if (loggedIn) cartStore.fetchCart()
-})
 
 function toggleLang() {
   const next = locale.value === 'zh-TW' ? 'en' : 'zh-TW'
