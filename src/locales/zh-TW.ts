@@ -52,6 +52,8 @@ export default {
     passwordMismatch: '兩次新密碼不一致',
     changeFailed: '修改失敗',
     changePasswordBtn: '修改密碼',
+    or: '或',
+    visitorLogin: '訪客登入',
   },
   product: {
     title: '商品列表',

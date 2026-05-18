@@ -52,6 +52,8 @@ export default {
     passwordMismatch: 'Passwords do not match',
     changeFailed: 'Change failed',
     changePasswordBtn: 'Change Password',
+    or: 'or',
+    visitorLogin: 'Login as Visitor',
   },
   product: {
     title: 'Products',

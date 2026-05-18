@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { UserFilled, Lock } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
-import { getErrorMessage } from '@/utils/error'
+import { getFullErrorMessage } from '@/utils/error'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -21,7 +21,20 @@ async function handleLogin() {
     await authStore.login(form.value)
     router.push('/')
   } catch (err: unknown) {
-    error.value = getErrorMessage(err, t('auth.loginFailed'))
+    error.value = getFullErrorMessage(err, t('auth.loginFailed'))
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handleVisitorLogin() {
+  loading.value = true
+  error.value = ''
+  try {
+    await authStore.login({ username: 'visitor', password: '123456' })
+    router.push('/')
+  } catch (err: unknown) {
+    error.value = getFullErrorMessage(err, t('auth.loginFailed'))
   } finally {
     loading.value = false
   }
@@ -34,16 +47,33 @@ async function handleLogin() {
       <h1 class="title">{{ t('common.appName') }}</h1>
       <el-form @submit.prevent="handleLogin" label-position="top">
         <el-form-item :label="t('auth.username')">
-          <el-input v-model="form.username" :prefix-icon="UserFilled" :placeholder="t('auth.username')" />
+          <el-input
+            v-model="form.username"
+            :prefix-icon="UserFilled"
+            :placeholder="t('auth.username')"
+          />
         </el-form-item>
         <el-form-item :label="t('auth.password')">
-          <el-input v-model="form.password" type="password" :prefix-icon="Lock" :placeholder="t('auth.password')" show-password />
+          <el-input
+            v-model="form.password"
+            type="password"
+            :prefix-icon="Lock"
+            :placeholder="t('auth.password')"
+            show-password
+          />
         </el-form-item>
         <el-alert v-if="error" :title="error" type="error" show-icon :closable="false" style="margin-bottom: 16px" />
         <el-button type="primary" native-type="submit" :loading="loading" style="width: 100%">
           {{ loading ? t('auth.logining') : t('auth.loginBtn') }}
         </el-button>
       </el-form>
+
+      <el-divider>{{ t('auth.or') }}</el-divider>
+
+      <el-button type="success" @click="handleVisitorLogin" :loading="loading" style="width: 100%">
+        👤 {{ t('auth.visitorLogin') }}
+      </el-button>
+
       <p style="text-align: center; margin-top: 16px">
         {{ t('auth.noAccount') }}<router-link to="/register">{{ t('auth.goRegister') }}</router-link>
       </p>
@@ -59,9 +89,11 @@ async function handleLogin() {
   justify-content: center;
   background: #f5f7fa;
 }
+
 .login-card {
   width: 400px;
 }
+
 .title {
   text-align: center;
   margin-bottom: 24px;

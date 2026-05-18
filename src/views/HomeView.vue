@@ -22,20 +22,19 @@ const searchKeyword = ref('')
 const allTags = ref<Tag[]>([])
 const selectedTagId = ref<number | null>(null)
 
-const serverReady = ref(false)
-const checking = ref(true)
-
 onMounted(async () => {
-  serverReady.value = await checkServer()
-  if (serverReady.value) {
-    const requests: Promise<unknown>[] = [productStore.fetchProducts(0), tagApi.getAll()]
-    if (authStore.isLoggedIn) {
-      requests.push(cartStore.fetchCart())
-    }
-    const results = await Promise.all(requests)
-    allTags.value = (results[1] as { data: Tag[] }).data
+  const ready = await checkServer()
+  if (!ready) {
+    ElMessage.error(t('common.serverWaking'))
+    return
   }
-  checking.value = false
+
+  const requests: Promise<unknown>[] = [productStore.fetchProducts(0), tagApi.getAll()]
+  if (authStore.isLoggedIn) {
+    requests.push(cartStore.fetchCart())
+  }
+  const results = await Promise.all(requests)
+  allTags.value = (results[1] as { data: Tag[] }).data
 })
 
 function handlePageChange(page: number) {
@@ -102,15 +101,9 @@ async function handleDecrease(productId: number) {
 </script>
 
 <template>
-  <div v-if="checking" class="server-waking">
-    <el-icon class="is-loading" :size="40"><Loading /></el-icon>
-    <h2>{{ t('common.serverWaking') }}</h2>
-    <p>{{ t('common.serverWakingDesc') }}</p>
-  </div>
-  <div v-else class="product-list">
+  <div class="product-list">
     <h1>{{ t('product.title') }}</h1>
 
-    <!-- 搜尋列 -->
     <div class="search-bar">
       <el-input
         v-model="searchKeyword"
@@ -126,7 +119,6 @@ async function handleDecrease(productId: number) {
       </el-input>
     </div>
 
-    <!-- 標籤列 -->
     <div class="tag-bar" v-if="allTags.length">
       <span
         class="filter-tag"
@@ -145,13 +137,11 @@ async function handleDecrease(productId: number) {
       >{{ tag.name }}</span>
     </div>
 
-    <!-- 載入中 -->
     <div v-if="productStore.loading" style="text-align: center; padding: 50px">
       <el-icon class="is-loading" :size="32"><Loading /></el-icon>
       <p>{{ t('common.loading') }}</p>
     </div>
 
-    <!-- 商品卡片 -->
     <el-row v-else :gutter="20">
       <el-col v-for="product in productStore.products" :key="product.id" :xs="24" :sm="12" :md="8" :lg="6">
         <el-card class="product-card" shadow="hover" @click="router.push(`/product/${product.id}`)">
@@ -163,7 +153,6 @@ async function handleDecrease(productId: number) {
             <h3>{{ product.name }}</h3>
             <p class="description">{{ product.description }}</p>
 
-            <!-- 商品標籤 -->
             <div class="tags" v-if="product.tags?.length">
               <span
                 v-for="tag in product.tags"
@@ -180,28 +169,20 @@ async function handleDecrease(productId: number) {
               </span>
             </div>
 
-            <!-- 已加入購物車：加減 -->
             <div v-if="cartStore.getQuantity(product.id) > 0" class="cart-controls" @click.stop>
               <el-button
-                size="small"
-                circle
+                size="small" circle
                 :disabled="cartStore.updatingMap[cartStore.getCartItemId(product.id) ?? 0]"
                 @click="handleDecrease(product.id)"
-              >
-                <el-icon><Minus /></el-icon>
-              </el-button>
+              ><el-icon><Minus /></el-icon></el-button>
               <span class="cart-qty">{{ cartStore.getQuantity(product.id) }}</span>
               <el-button
-                size="small"
-                circle
+                size="small" circle
                 :disabled="cartStore.updatingMap[cartStore.getCartItemId(product.id) ?? 0]"
                 @click="handleIncrease(product.id)"
-              >
-                <el-icon><Plus /></el-icon>
-              </el-button>
+              ><el-icon><Plus /></el-icon></el-button>
             </div>
 
-            <!-- 未加入：加入購物車 -->
             <el-button
               v-else
               type="primary"
@@ -223,7 +204,6 @@ async function handleDecrease(productId: number) {
       :description="t('product.noProducts')"
     />
 
-    <!-- 分頁 -->
     <div v-if="productStore.totalPages > 1" style="text-align: center; margin-top: 24px">
       <el-pagination
         background
@@ -292,7 +272,7 @@ h1 {
 .product-card {
   margin-bottom: 24px;
   overflow: hidden;
-  cursor: default;
+  cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
