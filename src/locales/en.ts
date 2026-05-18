@@ -21,6 +21,8 @@ export default {
     features: 'Features',
     frontend: 'Frontend',
     backend: 'Backend',
+    serverWaking: 'Server is waking up...',
+    serverWakingDesc: 'Free server is starting, please wait about 30 seconds',
   },
   auth: {
     username: 'Username',

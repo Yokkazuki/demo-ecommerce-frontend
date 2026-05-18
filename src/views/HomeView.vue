@@ -9,6 +9,7 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { tagApi, type Tag } from '@/api/tag'
 import { getFullErrorMessage } from '@/utils/error'
+import { checkServer } from '@/api/health'
 
 const { t } = useI18n()
 const productStore = useProductStore()
@@ -21,13 +22,20 @@ const searchKeyword = ref('')
 const allTags = ref<Tag[]>([])
 const selectedTagId = ref<number | null>(null)
 
+const serverReady = ref(false)
+const checking = ref(true)
+
 onMounted(async () => {
-  const requests: Promise<unknown>[] = [productStore.fetchProducts(0), tagApi.getAll()]
-  if (authStore.isLoggedIn) {
-    requests.push(cartStore.fetchCart())
+  serverReady.value = await checkServer()
+  if (serverReady.value) {
+    const requests: Promise<unknown>[] = [productStore.fetchProducts(0), tagApi.getAll()]
+    if (authStore.isLoggedIn) {
+      requests.push(cartStore.fetchCart())
+    }
+    const results = await Promise.all(requests)
+    allTags.value = (results[1] as { data: Tag[] }).data
   }
-  const results = await Promise.all(requests)
-  allTags.value = (results[1] as { data: Tag[] }).data
+  checking.value = false
 })
 
 function handlePageChange(page: number) {
@@ -94,7 +102,12 @@ async function handleDecrease(productId: number) {
 </script>
 
 <template>
-  <div class="product-list">
+  <div v-if="checking" class="server-waking">
+    <el-icon class="is-loading" :size="40"><Loading /></el-icon>
+    <h2>{{ t('common.serverWaking') }}</h2>
+    <p>{{ t('common.serverWakingDesc') }}</p>
+  </div>
+  <div v-else class="product-list">
     <h1>{{ t('product.title') }}</h1>
 
     <!-- 搜尋列 -->

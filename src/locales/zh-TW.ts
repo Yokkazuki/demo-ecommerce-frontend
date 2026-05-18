@@ -21,6 +21,8 @@ export default {
     features: '功能列表',
     frontend: '前端技術',
     backend: '後端技術',
+    serverWaking: '伺服器暖機中...',
+    serverWakingDesc: '免費伺服器正在啟動，請稍候約 30 秒',
   },
   auth: {
     username: '帳號',

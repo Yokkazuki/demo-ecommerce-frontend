@@ -3,13 +3,13 @@ import zhTW from './zh-TW'
 import en from './en'
 
 const i18n = createI18n({
-  legacy: false,      // 使用 Composition API 模式
-  locale: 'zh-TW',    // 預設繁體中文
+  legacy: false,
+  locale: localStorage.getItem('lang') || 'zh-TW',
   fallbackLocale: 'en',
   messages: {
     'zh-TW': zhTW,
-    en: en
-  }
+    en: en,
+  },
 })
 
 export default i18n
