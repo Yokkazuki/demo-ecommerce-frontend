@@ -22,7 +22,9 @@ export default {
     frontend: 'Frontend',
     backend: 'Backend',
     serverWaking: 'Server is waking up...',
-    serverWakingDesc: 'Free server is starting, please wait about 30 seconds',
+    serverWakingDesc: 'Server is starting, please wait about 30 seconds',
+    serverError: 'Cannot connect to server',
+    retry: 'Retry',
   },
   auth: {
     username: 'Username',

@@ -22,12 +22,18 @@ const searchKeyword = ref('')
 const allTags = ref<Tag[]>([])
 const selectedTagId = ref<number | null>(null)
 
+const serverChecking = ref(true)
+const serverError = ref(false)
+
 onMounted(async () => {
   const ready = await checkServer()
   if (!ready) {
-    ElMessage.error(t('common.serverWaking'))
+    serverError.value = true
+    serverChecking.value = false
     return
   }
+
+  serverChecking.value = false
 
   const requests: Promise<unknown>[] = [productStore.fetchProducts(0), tagApi.getAll()]
   if (authStore.isLoggedIn) {
@@ -98,13 +104,32 @@ async function handleDecrease(productId: number) {
     }
   }
 }
+
+function handleRetry() {
+  location.reload()
+}
 </script>
 
 <template>
   <div class="product-list">
     <h1>{{ t('product.title') }}</h1>
+    <!-- 暖機中 -->
+    <div v-if="serverChecking" class="server-status">
+      <el-icon class="is-loading" :size="40"><Loading /></el-icon>
+      <h2>{{ t('common.serverWaking') }}</h2>
+      <p class="status-desc">{{ t('common.serverWakingDesc') }}</p>
+    </div>
 
-    <div class="search-bar">
+    <!-- 暖機失敗 -->
+    <div v-else-if="serverError" class="server-status">
+      <el-empty :description="t('common.serverError')" :image-size="120">
+        <el-button type="primary" @click="handleRetry">
+          {{ t('common.retry') }}
+        </el-button>
+      </el-empty>
+    </div>
+    <template v-else>
+      <div class="search-bar">
       <el-input
         v-model="searchKeyword"
         :placeholder="t('product.searchPlaceholder')"
@@ -214,6 +239,8 @@ async function handleDecrease(productId: number) {
         @current-change="handlePageChange"
       />
     </div>
+    </template>
+    
   </div>
 </template>
 
