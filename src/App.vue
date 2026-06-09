@@ -109,6 +109,9 @@ setFontSize(currentFont.value)
                 </button>
               </template>
               <template v-else>
+                <button class="nav-btn" @click="router.push('/about')">
+                  <span class="nav-btn-text">{{ t('common.aboutTitle') }}</span>
+                </button>
                 <button class="nav-btn primary-btn" @click="router.push('/login')">
                   {{ t('common.login') }}
                 </button>
